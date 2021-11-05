@@ -18,11 +18,12 @@ class UserSeeder extends Seeder
     {
         $faker = Factory::create();
 
-        User::create([
-            'first_name' => 'Admin',
-            'last_name' => 'Ziko',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('12345678')
+        User::create(['name' => 'Admin',
+            'user_name' => 'ziko',
+            'email' => 'admin@admin.com', 'password' => Hash::make('12345678'),
+            'user_role' => 'admin',
+            'email_verified' => 1, 
+        
         ]);
     }
 }
