@@ -30,6 +30,7 @@ Route::group(['prefix' => 'v1/invite',
 
     Route::post('send', [SendInvitation::class, 'send']);
     Route::post('register/{token}', [SendInvitation::class, 'register']);
+    Route::post('verify/pin', [SendInvitation::class, 'verifyPin']);
 });
 
 

@@ -24,15 +24,15 @@ class RoleAuthorization
             if ($user && in_array($user->user_role, $roles)) {
                 return $next($request);
             }else {
-                return response()->json(['success' => false,  'message' => 'you are not allowed to access this page']);
+                return response()->json(['success' => false,  'message' => 'you are not allowed to access this page'], 404);
             }
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                return response()->json(['success' => false,  'message' => 'Token is Invalid']);
+                return response()->json(['success' => false,  'message' => 'Token is Invalid'], 422);
             } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                return response()->json(['success' => false,  'message' => 'Token is Expired']);
+                return response()->json(['success' => false,  'message' => 'Token is Expired'], 422);
             } else {
-                return response()->json(['success' => false,  'message' => 'Authorization Token not found']);
+                return response()->json(['success' => false,  'message' => 'Authorization Token not found'], 422);
             }
         }
 

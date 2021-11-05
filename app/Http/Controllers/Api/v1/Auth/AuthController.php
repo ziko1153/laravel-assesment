@@ -34,43 +34,14 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if ($token = $this->guard()->attempt($credentials)) {;
+        if ($token = $this->guard()->attempt($credentials + ["email_verified" => 1])) {
             return $this->respondWithToken($token);
         }
 
         return response()->json(['message' => 'Invalid Credentials'], 401);
     }
 
-    /**
-     * Register Person via email,first_name,last_name,email,password,password_confirmation field
-     *
-     * @param  \Illuminate\Http\Request  $request
-     *
-     * @return object User
-     */
-    public function register(Request $request)
-    {
-        $request->validate([
-            'first_name' => 'required|string|between:2,100',
-            'last_name' => 'required|string|between:2,100',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed|min:6'
 
-        ]);
-
-        $user = new User;
-        $user->first_name = $request->first_name;
-        $user->last_name = $request->last_name;
-        $user->email = $request->email;
-        $user->password =  Hash::make($request->password);
-
-        if (!$user->save()) {
-
-            return response()->json(['message' => 'Opps!! Something Went Wrong on Creating Account'], 500);
-        }
-
-        return response()->json(['message' => 'Successfully User Account Created', 'person' => $user]);
-    }
 
     /**
      * Log the user out (Invalidate the token)
@@ -104,11 +75,11 @@ class AuthController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                return response()->json(['success' => false,  'message' => 'Token is Invalid']);
+                return response()->json(['success' => false,  'message' => 'Token is Invalid'], 422);
             } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                return response()->json(['success' => false,  'message' => 'Token is Expired']);
+                return response()->json(['success' => false,  'message' => 'Token is Expired'], 422);
             } else {
-                return response()->json(['success' => false,  'message' => 'Authorization Token not found']);
+                return response()->json(['success' => false,  'message' => 'Authorization Token not found'], 422);
             }
         }
 
