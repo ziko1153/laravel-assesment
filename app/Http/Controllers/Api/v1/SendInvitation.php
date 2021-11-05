@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use Carbon\Carbon;
+use App\Models\User;
+use App\Mail\SendPin;
 use App\Models\Invitation;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Mail\SendInvitaitonMail;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class SendInvitation extends Controller
 {
@@ -35,9 +40,49 @@ class SendInvitation extends Controller
         return response()->json(['success' => true, 'message' => "Successfully send invitation to {$invitation->email}"]);
     }
 
-    public function register(Request $request)
+    public function register(Request $request, $token)
     {
 
-        return  $request;
+        $invitation = Invitation::where('token', $request->token)
+            ->whereRaw("created_at > NOW() - INTERVAL 15 MINUTE")
+            ->first();
+
+        if (!$invitation) {
+            return response()->json(['success' => false, 'message' => 'Sorry Token expired or Invalid Token']);
+        }
+
+        $this->validateRegisterData($request);
+
+        $user = User::create([
+            'user_name' => $request->user_name,
+            'email' => $invitation->email,
+            'password' => Hash::make($request->password),
+            'user_role' => 'user',
+            'registered_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'pin' => random_int(100000, 999999)
+        ]);
+
+        $invitation->delete();
+
+        Mail::to($user->email)->queue(new SendPin($user));
+
+        return response()->json(['success' => true, 'user' => $user, 'message' => 'we have sent 6 digit pin to your email address, please verify this pin']);
+    }
+
+
+    protected function validateRegisterData($request)
+    {
+        Validator::extend('without_spaces', function ($attr, $value) {
+
+            return preg_match('/^\S*$/u', $value);
+        });
+
+        $request->validate([
+            'user_name' => 'required|without_spaces|between:4,20|unique:users',
+            'password' => 'required|confirmed|min:6'
+
+        ], [
+            'user_name.without_spaces' => 'White Space Not Allowed'
+        ]);
     }
 }
