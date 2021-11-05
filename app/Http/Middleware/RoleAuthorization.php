@@ -15,13 +15,13 @@ class RoleAuthorization
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next,$roles)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         try {
 
 
             $user = JWTAuth::parseToken()->authenticate();
-            if ($user && in_array($user->role, $roles)) {
+            if ($user && in_array($user->user_role, $roles)) {
                 return $next($request);
             }else {
                 return response()->json(['success' => false,  'message' => 'you are not allowed to access this page']);

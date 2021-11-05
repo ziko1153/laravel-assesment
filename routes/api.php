@@ -1,11 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\AttachPostController;
-use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\FollowerController;
-use App\Http\Controllers\Api\PageController;
-use App\Http\Controllers\Api\NewsFeedController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\v1\auth\AuthController;
+use App\Http\Controllers\Api\v1\SendInvitation;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,40 +20,18 @@ Route::group([
 ], function () {
 
     Route::post('login', [AuthController::class, 'login']);
-    Route::post('register', [AuthController::class, 'register']);
     Route::post('logout', [AuthController::class, 'logout']);
 });
 
 
 // Page API
-Route::group([
-    'prefix' => 'page',
-    'middleware' => 'auth:api'
+Route::group(['prefix' => 'v1/invite',
 ], function () {
 
-    Route::post('create', [PageController::class, 'create']);
-    Route::post('{pageId}/attach-post', [AttachPostController::class, 'pagePost']);
+    Route::post('send', [SendInvitation::class, 'send']);
+    Route::post('register/{token}', [SendInvitation::class, 'register']);
 });
 
-// Follower  API
-Route::group([
-    'prefix' => 'follow',
-    'middleware' => 'auth:api'
-], function () {
-
-    Route::post('person/{personId}', [FollowerController::class, 'followerByPerson'])->name('follow.person');
-    Route::post('page/{pageId}', [FollowerController::class, 'followerByPage'])->name('follow.page');
-});
-
-// Attach   Post
-Route::group([
-    'prefix' => 'person',
-    'middleware' => 'auth:api'
-], function () {
-
-    Route::post('attach-post', [AttachPostController::class, 'selfPost']);
-    Route::get('feed', [NewsFeedController::class, 'getFeedData']);
-});
 
 
 // Invlaid Request Handle
