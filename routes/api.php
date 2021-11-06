@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\auth\AuthController;
 use App\Http\Controllers\Api\v1\SendInvitation;
+use App\Http\Controllers\Api\v1\UserProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,10 +22,13 @@ Route::group([
 
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
+   
 });
 
 
-// Page API
+Route::middleware('auth.role:admin,user')->post('v1/update-profile', [UserProfileController::class, 'update']);
+
+// Invitation and Registration API
 Route::group(['prefix' => 'v1/invite',
 ], function () {
 

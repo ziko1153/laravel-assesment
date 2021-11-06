@@ -8,6 +8,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 
 class AuthController extends Controller
@@ -38,7 +40,7 @@ class AuthController extends Controller
             return $this->respondWithToken($token);
         }
 
-        return response()->json(['message' => 'Invalid Credentials'], 401);
+        return response()->json(['message' => 'Invalid Credentials or Email not verified'], 401);
     }
 
 
